@@ -64,6 +64,9 @@ stop() {
   log "stopping NFS server"
   exportfs -uav >/dev/null 2>&1 || true
   rpc.nfsd 0 >/dev/null 2>&1 || true
+  pkill -TERM rpc.idmapd >/dev/null 2>&1 || true
+  pkill -TERM rpc.mountd >/dev/null 2>&1 || true
+  pkill -TERM rpcbind >/dev/null 2>&1 || true
   log "NFS server stopped"
 }
 
@@ -109,6 +112,12 @@ rpc.nfsd 0 >/dev/null 2>&1 || true
 log "exporting filesystems"
 exportfs -rav
 
+log "starting rpcbind for local NFS RPC service registration"
+rpcbind -w
+
+log "starting rpc.idmapd for NFSv4 identity mapping"
+rpc.idmapd
+
 log "starting kernel nfsd with $NFS_THREADS threads (NFSv4.1/NFSv4.2 only, TCP only)"
 rpc.nfsd \
   --no-udp \
@@ -116,6 +125,13 @@ rpc.nfsd \
   --nfs-version 4.1 \
   --nfs-version 4.2 \
   "$NFS_THREADS"
+
+log "starting rpc.mountd for kernel export/auth cache upcalls"
+rpc.mountd \
+  --no-udp \
+  --no-nfs-version 3 \
+  --nfs-version 4.1 \
+  --nfs-version 4.2
 
 if ! /usr/local/bin/healthcheck.sh; then
   log "ERROR: NFS server failed initial healthcheck"

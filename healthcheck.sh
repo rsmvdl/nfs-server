@@ -21,6 +21,16 @@ if [ "$threads" -lt 1 ]; then
   exit 1
 fi
 
+if ! pidof rpc.mountd >/dev/null 2>&1; then
+  echo "rpc.mountd is not running" >&2
+  exit 1
+fi
+
+if ! pidof rpc.idmapd >/dev/null 2>&1; then
+  echo "rpc.idmapd is not running" >&2
+  exit 1
+fi
+
 if ! exportfs -s >/tmp/exportfs.out 2>/tmp/exportfs.err; then
   cat /tmp/exportfs.err >&2 || true
   exit 1
