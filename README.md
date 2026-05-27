@@ -35,7 +35,9 @@ Specific runtime defaults:
 - Export path defaults to `SHARED_DIRECTORY=/exports/share`.
 - Export mode defaults to `rw,async,no_root_squash` for scratch/workdir throughput.
 - `NFS_THREADS` defaults to `16` and can be tuned from the provisioner.
-- Healthcheck verifies kernel nfsd threads and active exports without using `showmount`.
+- Healthcheck verifies kernel nfsd threads and this container's configured export paths without using `showmount`.
+- Startup exports only configured paths with explicit `exportfs -i -o ... client:path` calls.
+- Shutdown unexports only this container's configured paths and intentionally never runs global `exportfs -uav` or `rpc.nfsd 0`, because multiple privileged kernel-NFS pods on the same Kubernetes node can otherwise disrupt each other's exports/listeners.
 
 [![Publish container image](https://github.com/rsmvdl/nfs-server/actions/workflows/publish-image.yml/badge.svg)](https://github.com/rsmvdl/nfs-server/actions/workflows/publish-image.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
