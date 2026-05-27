@@ -1,0 +1,43 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Extract version
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true
+        body: |
+          ## Container Images Published
+
+          The image is published to GitHub Container Registry by the `Publish container image` workflow.
+
+          **Image:** `ghcr.io/rsmvdl/nfs-server:${{ env.VERSION }}`
+
+          **Tags:**
+          ```
+          ghcr.io/rsmvdl/nfs-server:${{ env.VERSION }}
+          ghcr.io/rsmvdl/nfs-server:latest
+          ```
+
+          **Supported Architectures:**
+          - `linux/amd64`
+          - `linux/arm64`
+
