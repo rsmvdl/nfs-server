@@ -37,10 +37,12 @@ client_specs() {
   local client
 
   clients="${clients//,/ }"
+  set -f
   for client in $clients; do
     [ -n "$client" ] || continue
     spec+=" ${client}(${options})"
   done
+  set +f
 
   if [ -z "$spec" ]; then
     spec=" *(${options})"
@@ -110,7 +112,6 @@ exportfs -rav
 log "starting kernel nfsd with $NFS_THREADS threads (NFSv4.1/NFSv4.2 only, TCP only)"
 rpc.nfsd \
   --no-udp \
-  --no-nfs-version 2 \
   --no-nfs-version 3 \
   --nfs-version 4.1 \
   --nfs-version 4.2 \
